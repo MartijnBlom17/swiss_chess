@@ -43,6 +43,18 @@ def create_image_score(player, loc_x_text, loc_y_text, loc_x_pic, loc_y_pic, zoo
     return ax
 
 
+@st.cache_data
+def create_random_color(iteration: int):
+    """Create random colors for the pawns."""
+    # To avoid having the same colors created multiple times
+    _ = iteration
+    random_color1 = ["white", "black"]
+    random_color2 = ["white", "black"]
+    random.shuffle(random_color1)
+    random.shuffle(random_color2)
+    return random_color1, random_color2
+
+
 def show_matchup(sorted_players: List[Player], is_final: bool = False, third_place_match: bool = False):
     """Show the matchup for the semi-finals or finals."""
     if is_final and not third_place_match:
@@ -52,15 +64,9 @@ def show_matchup(sorted_players: List[Player], is_final: bool = False, third_pla
 
     ax = fig.add_subplot(111)
     if is_final:
-        random_color1 = ["white", "black"]
-        random_color2 = ["white", "black"]
-        random.shuffle(random_color1)
-        random.shuffle(random_color2)
+        random_color1, random_color2 = create_random_color(1)
     else:
-        random_color1 = ["white", "black"]
-        random_color2 = ["white", "black"]
-        random.shuffle(random_color1)
-        random.shuffle(random_color2)
+        random_color1, random_color2 = create_random_color(2)
 
     # Text
     if is_final:
@@ -70,7 +76,7 @@ def show_matchup(sorted_players: List[Player], is_final: bool = False, third_pla
 
     # Text
     if not is_final:
-        ax.text(0, 6, "Seed 1 vs. Seed 4", size=11, ha="center", va="center")
+        ax.text(0, 6, "#1 vs. #4", size=11, ha="center", va="center")
     elif third_place_match:
         ax.text(0, 6, "Winner match", size=11, ha="center", va="center")
     # Player 1
@@ -81,9 +87,9 @@ def show_matchup(sorted_players: List[Player], is_final: bool = False, third_pla
 
     # Dash
     if is_final and not third_place_match:
-        ax.plot([-0.5, 0.5], [6, 6], "k", linewidth=3.0)
+        ax.plot([-0.5, 0.5], [6.5, 6.5], "k", linewidth=3.0)
     else:
-        ax.plot([-0.5, 0.5], [5, 5], "k", linewidth=3.0)
+        ax.plot([-0.5, 0.5], [5.5, 5.5], "k", linewidth=3.0)
 
     # Player 4
     if is_final and not third_place_match:
@@ -97,13 +103,13 @@ def show_matchup(sorted_players: List[Player], is_final: bool = False, third_pla
     # Text
     if not is_final or third_place_match:
         if not is_final:
-            ax.text(0, 0, "Seed 2 vs. Seed 3", size=11, ha="center", va="center")
+            ax.text(0, 0, "#2 vs. #3", size=11, ha="center", va="center")
         elif third_place_match:
             ax.text(0, 0, "Third place match", size=11, ha="center", va="center")
         # Player 2
         ax = create_image_score(sorted_players[1], -1.5, 1.9, -1.5, -3, 1, "center", ax, final=True)
         # Dash
-        ax.plot([-0.5, 0.5], [-1, -1], "k", linewidth=3.0)
+        ax.plot([-0.5, 0.5], [-0.5, -0.5], "k", linewidth=3.0)
         # Player 3
         ax = create_image_score(sorted_players[2], 1.5, 1.9, 1.5, -3, 1, "center", ax, final=True)
         # Text

@@ -1,4 +1,5 @@
 """The puzzle battle for the swiss chess tournament."""
+import time
 from typing import List
 
 import chess
@@ -8,6 +9,42 @@ import streamlit as st
 
 from swiss_chess.utils.player import Player
 from swiss_chess.utils.utils import chess_puzzle_api
+
+
+def create_chess_puzzle(rating: int, moves: int, iteration: int):
+    """Create the chess puzzle."""
+    response = chess_puzzle_api(rating, moves, iteration)
+    fen = response.json()["puzzles"][0]["fen"]
+    all_moves = response.json()["puzzles"][0]["moves"]
+
+    split_respnse = fen.split(" ")
+    if split_respnse[1] == "b":
+        color = "White"
+    else:
+        color = "Black"
+    col1, col2 = st.columns([3, 2])
+    col1.title(f"{color} to move with {moves} move(s).")
+    image_placeholder = st.empty()
+    board = chess.Board(fen)
+    svg = chess.svg.board(board, size=700)
+    board.push(chess.Move.from_uci(all_moves[0]))
+    svg = chess.svg.board(board, lastmove=chess.Move.from_uci(all_moves[0]), size=700)
+    image_placeholder.image(svg, output_format="SVG")
+
+    submit_key = f"puzzle_{iteration}"
+    if submit_key not in st.session_state:
+        st.session_state[submit_key] = False
+
+    if col2.button("Show solution", key=f"solution_{iteration}"):
+        st.session_state[submit_key] = True
+
+    if st.session_state[submit_key]:
+        for move in all_moves[1:]:
+            board.push(chess.Move.from_uci(move))
+            svg = chess.svg.board(board, lastmove=chess.Move.from_uci(move), size=700)
+            image_placeholder.image(svg, output_format="SVG")
+            time.sleep(1)
+        st.session_state[submit_key] = False
 
 
 def puzzle_battle(player1: Player, player2: Player, cnt: int):
@@ -29,18 +66,7 @@ def puzzle_battle(player1: Player, player2: Player, cnt: int):
     if not st.session_state[submit_key]:
         st.stop()
 
-    response = chess_puzzle_api(rating, moves)
-    fen = response.json()["puzzles"][0]["fen"]
-
-    split_respnse = fen.split(" ")
-    if split_respnse[1] == "w":
-        color = "White"
-    else:
-        color = "Black"
-    st.title(f"{color} to move with {moves} move(s).")
-    board = chess.Board(fen)
-    svg = chess.svg.board(board, size=700)
-    st.image(svg, output_format="SVG")
+    create_chess_puzzle(rating, moves, cnt)
 
     winner = st.selectbox(
         "Provide the name of the winner of the puzzle battle:",
@@ -75,7 +101,8 @@ def determine_rounds_standings(all_players: List[Player], tiebreaker):
         sorted_players = sorted(all_players, key=lambda x: x.points, reverse=True)
         all_points = [(player.points, 0) for player in sorted_players]
 
-    all_points2 = [point for point in all_points if point >= all_points[3]]
+    max_standings = min(3, len(all_points) - 1)
+    all_points2 = [point for point in all_points if point >= all_points[max_standings]]
     top_players = sorted_players[: len(all_points2)]
     cnt = 0
     while len(all_points2) != len(set(all_points2)):

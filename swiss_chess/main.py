@@ -18,20 +18,20 @@ st.cache_data()
 def sidebar_input():
     """Create the sidebar for the input of the Swiss Chess tournament."""
     if "player_names" not in st.session_state:
-        st.session_state.player_names = [""]
+        st.session_state["player_names"] = [""]
 
     with st.sidebar:
         button_result = st.button("Add Player")
         if button_result:
-            st.session_state.player_names.append("")
+            st.session_state["player_names"].append("")
             button_result = False
 
-        for i, player_name in enumerate(st.session_state.player_names):
-            st.session_state.player_names[i] = st.text_input(
+        for i, player_name in enumerate(st.session_state["player_names"]):
+            st.session_state["player_names"][i] = st.text_input(
                 f"Player name {i+1}", value=player_name, key=f"player_name_{i}"
             )
 
-        players = st.session_state.player_names
+        players = st.session_state["player_names"]
         rounds = int(st.text_input("Number of rounds", "4"))
 
         with st.expander("Additional settings", False):
@@ -80,10 +80,20 @@ def create_rounds(all_players: List[Player], rounds: int):
                 show_standings(all_players, col3)
 
 
+def check_min_players(all_players: List[Player], min_players: int):
+    """Check if there are enough players to start the tournament."""
+    if len(all_players) < min_players:
+        st.error(f"Need at least {min_players} players to start the tournament.")
+        st.stop()
+
+
 def main() -> List[Player]:
     """Run the main function of the Swiss Chess tournament format."""
     st.set_page_config(page_title="Swiss Chess", page_icon="data/images/pikapolice.jpg", layout="wide")
     rounds, all_players, third_place_match, tiebreaker, finals_mode = sidebar_input()
+
+    # Minimum players check
+    check_min_players(all_players, min_players=4)
 
     # Rounds
     create_rounds(all_players, rounds)

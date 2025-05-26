@@ -9,9 +9,16 @@ from swiss_chess.utils.plotting import show_matchup
 
 def sort_players_final(sorted_players: List[Player]):
     """Sort the players for the final."""
-    winners = [p for p in sorted_players if p.won_semi_final]
-    losers = [p for p in sorted_players if not p.won_semi_final]
-    return winners + losers
+    if sorted_players[0].won_semi_final:
+        if sorted_players[1].won_semi_final:
+            return [sorted_players[0], sorted_players[3], sorted_players[2], sorted_players[1]]
+        else:
+            return [sorted_players[0], sorted_players[3], sorted_players[1], sorted_players[2]]
+    else:
+        if sorted_players[1].won_semi_final:
+            return [sorted_players[3], sorted_players[0], sorted_players[2], sorted_players[1]]
+        else:
+            return [sorted_players[3], sorted_players[0], sorted_players[1], sorted_players[2]]
 
 
 def create_semis(sorted_players: List[Player]):

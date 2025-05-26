@@ -16,7 +16,7 @@ def take_odd_player_out(sorted_players: List[Player]):
         if player.no_game_found == 0:
             odd_player = sorted_players.pop(player_loc)
             odd_player.add_no_game()
-            st.write(f"Player {odd_player.name} has no pair.")
+            st.warning(f"Player {odd_player.name} has no pair.")
             break
         player_loc += 1
     return sorted_players
